@@ -1,5 +1,4 @@
 // SPDX-License-Identifier: MIT
-
 pragma solidity ^0.8.0;
 
 contract HealthcareRecords {
@@ -14,7 +13,6 @@ contract HealthcareRecords {
     }
 
     mapping(uint256 => Record[]) private patientRecords;
-
     mapping(address => bool) private authorizedProviders;
 
     modifier onlyOwner() {
@@ -37,9 +35,7 @@ contract HealthcareRecords {
 
     function authorizeProvider(address provider) public onlyOwner {
         authorizedProviders[provider] = true;
-
     }
-
 
     function addRecord(uint256 patientID, string memory patientName, string memory diagnosis, string memory treatment) public onlyAuthorizedProvider {
         uint256 recordID = patientRecords[patientID].length + 1;
@@ -50,4 +46,22 @@ contract HealthcareRecords {
         return patientRecords[patientID];
     }
 
+    // 🚨 New function: Delete a record by its record ID
+    function deleteRecord(uint256 patientID, uint256 recordID) public onlyAuthorizedProvider {
+        Record[] storage records = patientRecords[patientID];
+        uint256 length = records.length;
+        bool found = false;
+
+        for (uint256 i = 0; i < length; i++) {
+            if (records[i].recordID == recordID) {
+                // Swap and pop for efficient delete
+                records[i] = records[length - 1];
+                records.pop();
+                found = true;
+                break;
+            }
+        }
+
+        require(found, "Record not found");
+    }
 }
